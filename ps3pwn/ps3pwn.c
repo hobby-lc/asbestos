@@ -362,8 +362,8 @@ int cb_handle_ctl(u8 bmRequestType, u8 bRequest, u16 wValue, u16 wIndex, u16 wLe
 		printf("read_stage2_block(offset=0x%x,len=0x%x)\n", offset, length);
 		if (available < 0)
 			available = 0;
-		if (length < available) {
-			printf("warning: length exceeded, want 0x%x, got 0x%x\n", length, available);
+		if (length > available) {
+			printf("warning: length exceeded, want 0x%x, avail 0x%x\n", length, available);
 			length = available;
 		}
 		write_fifo0(&stage2_buf[offset], length);
