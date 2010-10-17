@@ -134,6 +134,7 @@ port_status hub_port_status[7] = {
 
 int state = 0;
 int advance_counter = 0;
+int is_linux = 0;
 
 void next_state(void);
 
@@ -170,6 +171,11 @@ void cb_get_descriptor(u16 wValue, u16 wIndex, u16 wLength)
 		case DESC(D_HUB, DEVICE, 0): SEND_DESCRIPTOR(hub_dev); break;
 		case DESC(D_HUB, CONFIGURATION, 0): SEND_DESCRIPTOR(hub_cfg); break;
 		case DESC(D_HUB, HUB, 0): SEND_DESCRIPTOR(hub_hub); break;
+		case DESC(D_HUB, 6, 0):
+			is_linux = 1;
+			printf("Linux detected, aborting device sequencing\n");
+			ep0_stall();
+			break;
 
 		case DESC(D_PWN1, DEVICE, 0): SEND_DESCRIPTOR(pwn1_dev); break;
 		case DESC(D_PWN1, CONFIGURATION, 0):
@@ -383,7 +389,8 @@ void cb_set_configuration(int idx)
 
 void next_state(void)
 {
-	advance_counter = 10;
+	if (!is_linux)
+		advance_counter = 10;
 }
 
 void next_state_wait(int delay)
@@ -435,6 +442,7 @@ void cb_reset(void)
 	state = 0;
 	advance_counter = 0;
 	do_hdr = 1;
+	is_linux = 0;
 }
 
 void cb_sof(void)
